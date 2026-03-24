@@ -1,0 +1,11 @@
+name: UndergroundViewDistance
+version: '1.0.1'
+main: sillycorn.undergroundViewDistance.UndergroundViewDistance
+api-version: '1.21'
+authors: [sillycorn]
+description: Underground View Distance
+dependencies:
+  server:
+    ProtocolLib:
+      load: BEFORE
+      required: true

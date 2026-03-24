@@ -1,0 +1,21 @@
+settings:
+  # The view distance set to players when they go underground.
+  # Must be lower than your server.properties view-distance
+  underground-view-distance: 12
+
+  # The simulation distance set to players when they go underground.
+  # Must be lower than your server.properties simulation-distance
+  # Recommended to keep at roughly half of underground-view-distance or half - 1
+  underground-simulation-distance: 6
+
+  # The Y level threshold where a player is considered "underground".
+  underground-y: 0.0
+
+  # The Y level threshold where a player is considered back on the "surface".
+  # Keep this slightly higher than 'underground-y' to prevent rapid switching if a player jumps up and down especially with lower check interval value
+  surface-y: 20.0
+
+  # How often (in ticks) should the plugin check player locations?
+  # 20 ticks = 1 second. 200 ticks = 10 seconds.
+  # Higher values save CPU but take longer to load times surface chunks.
+  check-interval-ticks: 200
