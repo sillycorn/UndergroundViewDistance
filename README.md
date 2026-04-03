@@ -9,6 +9,8 @@ On a standard server loading 16 chunks of radius (1089 chunks) is standard pract
 
 **I/O Pressure Reduction**: Fewer chunks loaded means significantly lower read/write operations on your storage. This is critical for servers running on standard HDDs or budget-tier SSDs, preventing disk-induced stutter.
 
+Instant Load Mitigation: Prevents massive CPU and I/O spikes when players log in, respawn, or teleport directly underground. The plugin instantly applies optimized distances before the server attempts to load the massive surface-level chunk radius.
+
 ---------------
 summary
 chunk optimizer in a way for optimization purposes for those who want max performance from their hardware
@@ -20,3 +22,5 @@ Customizable by allowing you to change view distance and simulation distance ind
 Flicker-Free with zero visual disruption when changing view distance
 
 Buffer zones to not worry about players unloading and loading chunks rapidly
+
+Instantly adapts to fast travels and joins (join/teleport/respawn) to prevent temporary chunk-loading lag spikes

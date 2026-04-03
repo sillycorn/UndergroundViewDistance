@@ -1,12 +1,12 @@
 settings:
   # The view distance set to players when they go underground.
   # Must be lower than your server.properties view-distance
-  underground-view-distance: 8
+  underground-view-distance: 6
 
   # The simulation distance set to players when they go underground.
   # Must be lower than your server.properties simulation-distance
   # Recommended to keep at roughly half of underground-view-distance
-  underground-simulation-distance: 5
+  underground-simulation-distance: 4
 
   # The Y level threshold where a player is considered "underground".
   underground-y: 0.0

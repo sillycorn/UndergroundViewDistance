@@ -4,7 +4,7 @@ plugins {
 }
 
 group = 'sillycorn'
-version = '1.0.1'
+version = '2.3'
 
 repositories {
     mavenCentral()

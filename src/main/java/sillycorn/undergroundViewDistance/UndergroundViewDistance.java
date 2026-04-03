@@ -8,11 +8,14 @@ import com.comphenix.protocol.events.PacketEvent;
 import org.bukkit.Bukkit;
 import org.bukkit.World;
 import org.bukkit.entity.Player;
+import org.bukkit.event.EventHandler;
+import org.bukkit.event.Listener;
+import org.bukkit.event.player.PlayerJoinEvent;
+import org.bukkit.event.player.PlayerRespawnEvent;
+import org.bukkit.event.player.PlayerTeleportEvent;
 import org.bukkit.plugin.java.JavaPlugin;
 
-import java.util.Collection;
-
-public class UndergroundViewDistance extends JavaPlugin {
+public class UndergroundViewDistance extends JavaPlugin implements Listener {
     private int defaultView;
     private int undergroundView;
     private int defaultSimulation;
@@ -24,14 +27,16 @@ public class UndergroundViewDistance extends JavaPlugin {
     @Override
     public void onEnable() {
         saveDefaultConfig();
-
-        this.undergroundView = getConfig().getInt("settings.underground-view-distance", 8);
+        
+        this.undergroundView = getConfig().getInt("settings.underground-view-distance", 6);
         this.undergroundSimulation = getConfig().getInt("settings.underground-simulation-distance", 4);
         this.undergroundY = getConfig().getDouble("settings.underground-y", 0.0);
         this.surfaceY = getConfig().getDouble("settings.surface-y", 20.0);
         this.checkInterval = getConfig().getLong("settings.check-interval-ticks", 200L);
         this.defaultView = Bukkit.getServer().getViewDistance();
         this.defaultSimulation = Bukkit.getServer().getSimulationDistance();
+
+        Bukkit.getPluginManager().registerEvents(this, this);
 
         ProtocolLibrary.getProtocolManager().addPacketListener(
                 new PacketAdapter(this, ListenerPriority.HIGHEST, PacketType.Play.Server.VIEW_DISTANCE) {
@@ -43,43 +48,8 @@ public class UndergroundViewDistance extends JavaPlugin {
         );
 
         Bukkit.getScheduler().runTaskTimer(this, () -> {
-            Collection<? extends Player> players = Bukkit.getOnlinePlayers();
-            if (players.isEmpty()) {
-                return;
-            }
-
-            for (Player player : players) {
-                if (player.getWorld().getEnvironment() != World.Environment.NORMAL) {
-                    if (player.getViewDistance() != defaultView) {
-                        player.setViewDistance(defaultView);
-                        player.setSendViewDistance(defaultView);
-                    }
-                    if (player.getSimulationDistance() != defaultSimulation) {
-                        player.setSimulationDistance(defaultSimulation);
-                    }
-                    continue;
-                }
-
-                double y = player.getY();
-
-                if (y < undergroundY) {
-                    if (player.getViewDistance() != undergroundView) {
-                        player.setViewDistance(undergroundView);
-                        player.setSendViewDistance(undergroundView);
-                    }
-                    if (player.getSimulationDistance() != undergroundSimulation) {
-                        player.setSimulationDistance(undergroundSimulation);
-                    }
-                }
-                else if (y > surfaceY) {
-                    if (player.getViewDistance() != defaultView) {
-                        player.setViewDistance(defaultView);
-                        player.setSendViewDistance(defaultView);
-                    }
-                    if (player.getSimulationDistance() != defaultSimulation) {
-                        player.setSimulationDistance(defaultSimulation);
-                    }
-                }
+            for (Player player : Bukkit.getOnlinePlayers()) {
+                updatePlayer(player);
             }
         }, 0L, checkInterval);
         getLogger().info("Underground View & Simulation Distance active - Config Loaded Successfully");
@@ -89,14 +59,47 @@ public class UndergroundViewDistance extends JavaPlugin {
     public void onDisable() {
         ProtocolLibrary.getProtocolManager().removePacketListeners(this);
         for (Player player : Bukkit.getOnlinePlayers()) {
-            if (player.getViewDistance() != defaultView) {
-                player.setViewDistance(defaultView);
-                player.setSendViewDistance(defaultView);
-            }
-            if (player.getSimulationDistance() != defaultSimulation) {
-                player.setSimulationDistance(defaultSimulation);
-            }
+            setDistances(player, defaultView, defaultSimulation);
         }
         getLogger().info("Underground View Distance off");
+    }
+
+    @EventHandler
+    public void onPlayerJoin(PlayerJoinEvent event) {
+        updatePlayer(event.getPlayer());
+    }
+
+    @EventHandler
+    public void onPlayerTeleport(PlayerTeleportEvent event) {
+        Bukkit.getScheduler().runTask(this, () -> updatePlayer(event.getPlayer()));
+    }
+
+    @EventHandler
+    public void onPlayerRespawn(PlayerRespawnEvent event) {
+        Bukkit.getScheduler().runTask(this, () -> updatePlayer(event.getPlayer()));
+    }
+
+    private void updatePlayer(Player player) {
+        if (player.getWorld().getEnvironment() != World.Environment.NORMAL) {
+            setDistances(player, defaultView, defaultSimulation);
+            return;
+        }
+
+        double y = player.getY();
+        if (y < undergroundY) {
+            setDistances(player, undergroundView, undergroundSimulation);
+        } else if (y > surfaceY) {
+            setDistances(player, defaultView, defaultSimulation);
+        }
+    }
+
+    private void setDistances(Player player, int view, int simulation) {
+        if (player.getViewDistance() != view) {
+            player.setViewDistance(view);
+            player.setSendViewDistance(view);
+        }
+        if (player.getSimulationDistance() != simulation) {
+            player.setSimulationDistance(simulation);
+        }
     }
 }
